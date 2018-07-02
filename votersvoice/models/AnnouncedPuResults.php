@@ -35,9 +35,9 @@ class AnnouncedPuResults extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['polling_unit_uniqueid', 'party_abbreviation', 'party_score', 'entered_by_user', 'date_entered', 'user_ip_address'], 'required'],
+            [['polling_unit_uniqueid', 'party_abbreviation', 'party_score', 'entered_by_user', 'user_ip_address'], 'required'],
             [['party_score'], 'integer'],
-            [['date_entered'], 'safe'],
+            [['party_abbreviation'], 'unique'],
             [['polling_unit_uniqueid', 'entered_by_user', 'user_ip_address'], 'string', 'max' => 50],
             [['party_abbreviation'], 'string', 'max' => 4],
         ];
@@ -59,10 +59,8 @@ class AnnouncedPuResults extends \yii\db\ActiveRecord
         ];
     }
 
-    public function savePuResult($model){
-        $val = PollingUnit::find()->orderBy('uniqueid')->max('uniqueid');
-        $value = ($val) ? ($val + 1) : 1;
-        $this->polling_unit_uniqueid =  strval($value);
+    public function savePuResult($model, $id){
+        $this->polling_unit_uniqueid =  strval($id);
         $this->party_abbreviation = (string) $model->partyid;
         $this->party_score = (int) $model->party_score;
         $this->entered_by_user = (string) "John Doe";

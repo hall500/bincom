@@ -3,12 +3,16 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\ActiveForm;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Poll Results';
 $this->params['breadcrumbs'][] = $this->title;
+if(Yii::$app->session->hasFlash('poll_added')){
+    echo '<div class="alert alert-success">'.Yii::$app->session->getFlash('poll_added').'</div>';
+}
 ?>
 
 <div class="row">
@@ -25,7 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [],
         [
             'prompt' => 'Select a Ward',
-            'onchange' => '$.post("/bincom/votersvoice/web/announced-pu-results/poll-results?id=" + $(this).val(), function(data){
+            'onchange' => '$.post("'. Url::toRoute('/announced-pu-results/poll-results?id=') .'" + $(this).val(), function(data){
                 $("div#announced-pu-results-table").html(data);
             });
             '

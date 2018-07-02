@@ -66,17 +66,7 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-
-        $polling_units = PollingUnit::find()->all();
-        foreach($polling_units as $polling_unit){
-            $apuresults = AnnouncedPuResults::find()->all();
-            print_r($apuresults);
-        }
-
-        $this->add(1,2,3);
-        print_r($this->_parties);
-        die();
-        //return $this->render('index');
+        return $this->render('index');
     }
 
     public function add($polling_id, $partyid, $party_score)

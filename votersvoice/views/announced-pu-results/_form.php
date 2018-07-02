@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\helpers\ArrayHelper;
 use app\models\States;
-
+use yii\helpers\Url;
 /* @var $this yii\web\View */
 /* @var $model app\models\AnnouncedPuResults */
 /* @var $form yii\widgets\ActiveForm */
@@ -18,7 +18,7 @@ use app\models\States;
         ArrayHelper::map(States::find()->all(), 'state_id', 'state_name'),
         [
             'prompt' => 'Choose a State',
-            'onchange' => '$.post("/bincom/votersvoice/web/announced-pu-results/all-lgas?id=" + $(this).val(), function(data){
+            'onchange' => '$.post("'. Url::toRoute('/announced-pu-results/all-lgas?id=') .'" + $(this).val(), function(data){
                 $("select#announcedpuresults-lga_id").html(data);
             });
             '
@@ -29,7 +29,7 @@ use app\models\States;
         [],
         [
             'prompt' => 'Select a State',
-            'onchange' => '$.post("/bincom/votersvoice/web/announced-pu-results/all-wards?id=" + $(this).val(), function(data){
+            'onchange' => '$.post("'. Url::toRoute('/announced-pu-results/all-wards?id=') .'" + $(this).val(), function(data){
                 $("select#announcedpuresults-ward_id").html(data);
             });
             '
@@ -40,7 +40,7 @@ use app\models\States;
         [],
         [
             'prompt' => 'Select a Local Government',
-            'onchange' => '$.post("/bincom/votersvoice/web/announced-pu-results/all-pollingunits?id=" + $(this).val() + "&lga_id=" + $("select#announcedpuresults-lga_id").val(), function(data){
+            'onchange' => '$.post("'. Url::toRoute('/announced-pu-results/all-pollingunits?id=') .'" + $(this).val() + "&lga_id=" + $("select#announcedpuresults-lga_id").val(), function(data){
                 $("select#announcedpuresults-polling_unit_uniqueid").html(data);
             });
             '

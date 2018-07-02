@@ -14,6 +14,8 @@ use app\models\PollingUnit;
 use app\models\Party;
 use yii\helpers\ArrayHelper;
 use app\models\NewPollingUnit;
+use app\models\NewPollParty;
+use yii\helpers\Url;
 /**
  * AnnouncedPuResultsController implements the CRUD actions for AnnouncedPuResults model.
  */
@@ -93,15 +95,9 @@ class AnnouncedPuResultsController extends Controller
             $newunit->date_entered = date('D, M Y H:i:s');
             //$newunit->user_ip_address = $_SERVER['REMOTE_HOST'];
             if($newunit->validate()){
-                $newresult = new AnnouncedPuResults();
-                if($newresult->savePuResult($model)){
-                    print_r('Both Units Vaidated Successfully');
-                    die();
-                    //$newunit->save();
-                    //$newresult->save();
-                }
-                var_dump($newresult);
-               die();
+                $newunit->save();
+                Yii::$app->session->setFlash('poll_added','New Polling Unit Added Successfully');
+                return $this->redirect('index');
             }
             print_r('Cannot validate Input');
             die();
@@ -122,14 +118,21 @@ class AnnouncedPuResultsController extends Controller
      */
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id);
+        $parties_added = AnnouncedPuResults::find(['party_abbreviation','party_score'])->where(['polling_unit_uniqueid' => $id])->all();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->result_id]);
+        $model = new NewPollParty();
+
+        if ($model->load(Yii::$app->request->post())) {
+            $newresult = new AnnouncedPuResults();
+            if($newresult->savePuResult($model, $id)){
+                $newresult->save();
+                return $this->redirect(['update', 'id' => $newresult->polling_unit_uniqueid]);
+            }
         }
 
         return $this->render('update', [
             'model' => $model,
+            'parties_added' => $parties_added,
         ]);
     }
 
@@ -164,15 +167,11 @@ class AnnouncedPuResultsController extends Controller
     }
 
     public function actionAllLgas($id){
-        if($id == 'all'){
-            $this->getAllStateTotalResults();
-        }
         $countLgas = LGA::find()->where(['state_id' => $id])->count();
         $lgas = LGA::find()->select(['uniqueid','lga_id','lga_name'])->where(['state_id' => $id])->all();
 
         if($countLgas > 0){
             echo "<option value=''disabled selected>Choose a Local Government</option>";
-            echo "<option value='all'>View All Results for this State</option>";
             foreach($lgas as $lga){
                 echo "<option value='{$lga->lga_id}'>{$lga->lga_name}</option>";
             }
@@ -182,15 +181,11 @@ class AnnouncedPuResultsController extends Controller
     }
 
     public function actionAllWards($id){
-        if($id == 'all'){
-            $this->getAllLGATotalResults();
-        }
         $countwards = Ward::find()->where(['lga_id' => $id])->count();
         $wards = Ward::find()->select(['uniqueid','ward_id','ward_name'])->where(['lga_id' => $id])->all();
 
         if($countwards > 0){
             echo "<option value=''disabled selected>Choose a Ward</option>";
-            echo "<option value='all'>View All Results for this LGA</option>";
             foreach($wards as $ward){
                 echo "<option value='{$ward->ward_id}'>{$ward->ward_name}</option>";
             }
@@ -205,7 +200,6 @@ class AnnouncedPuResultsController extends Controller
 
         if($countpollingunits > 0){
             echo "<option value=''disabled selected>Choose Polling Unit</option>";
-            echo "<option value='all'>View All Results for this Ward</option>";
             foreach($pollingunits as $pollingunit){
                 echo "<option value='{$pollingunit->uniqueid}'>{$pollingunit->polling_unit_number} - {$pollingunit->polling_unit_name}</option>";
             }
@@ -215,9 +209,6 @@ class AnnouncedPuResultsController extends Controller
     }
 
     public function actionPollResults($id){
-        if($id == 'all'){
-            $this->getAllWardTotalResults();
-        }
         $countpollingres = AnnouncedPuResults::find()->where(['polling_unit_uniqueid' => $id])->count();
         $pollingres = AnnouncedPuResults::find()->select(['party_abbreviation','party_score'])->where(['polling_unit_uniqueid' => $id])->all();
         $html = '';
@@ -225,6 +216,7 @@ class AnnouncedPuResultsController extends Controller
         if($countpollingres > 0){
             $html = '
                 <h1>Polling results</h1>
+                <a href="'. Url::toRoute('/announced-pu-results/update?id=' . $id) .'" class="btn btn-block btn-primary">Add Result</a>
                 <table class="table table-striped">
                 <thead>
                     <tr>
@@ -253,27 +245,6 @@ class AnnouncedPuResultsController extends Controller
                  </div>
             ";
         }
-    }
-
-    private function getAllWardTotalResults(){
-        //$wards = Ward::find()->select(['uniqueid','ward_id','ward_name'])->where(['lga_id' => $id])->all();
-
-        echo "<div class='jumbotron'><h1>All Results for the Wards</h1></div>";
-        exit();
-    }
-
-    private function getAllLGATotalResults(){
-        //$wards = Ward::find()->select(['uniqueid','ward_id','ward_name'])->where(['lga_id' => $id])->all();
-
-        echo "<option value='all' selected>View All Results for this Ward</option>";
-        exit();
-    }
-
-    private function getAllStateTotalResults(){
-        //$wards = Ward::find()->select(['uniqueid','ward_id','ward_name'])->where(['lga_id' => $id])->all();
-
-        echo "<option value='all' selected>View All Results for this Ward</option>";
-        exit();
     }
 
     public function actionResults($id){

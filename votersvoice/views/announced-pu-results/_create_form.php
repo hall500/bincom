@@ -57,15 +57,6 @@ use app\models\Party;
     </div>
     </div>
 
-    <?= $form->field($model, 'partyid')->dropDownList(
-        ArrayHelper::map(Party::find()->all(), 'partyid', 'partyname'),
-            [
-                'prompt' => 'Choose a Party',
-            ]
-        )->label('Party') ?>
-
-    <?= $form->field($model, 'party_score')->textInput(['placeholder' => 'Enter Party Score']) ?>
-
     <div class="form-group">
         <?php echo Html::submitButton('Add', ['class' => 'btn btn-success']); ?>
     </div>
